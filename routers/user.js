@@ -20,7 +20,19 @@ router.post("/users/decode", async (req, res) => {
   try {
     const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET);
     const user = await User.findById(decoded._id);
-    res.send(true)
+    let sent = false;
+    user.tokens.forEach((token) => {
+      if (token.token === req.cookies.token) {
+        sent = true;
+      }
+    });
+
+    if (sent === false) {
+      throw new Error("token not found");
+    }
+    else{
+      res.send(true)
+    }
   } catch (error) {
     res.send(false);
   }
@@ -33,6 +45,7 @@ router.post("/users/login", async (req, res) => {
       req.body.password
     );
     const token = await user.generateAuthToken();
+    console.log(user);
     res.cookie("token", token, { httpOnly: true });
     res.send({ user, token });
   } catch (e) {
@@ -59,6 +72,16 @@ router.post("/users/logoutAll", auth, async (req, res) => {
     res.send();
   } catch (e) {
     res.status(500).send();
+  }
+});
+
+router.post("/users/findByEmail", auth, async (req, res) => {
+  try {
+    const user = await User.findByEmail(req.body.email);
+    console.log(user);
+    res.send({ user });
+  } catch (error) {
+    res.status(404).send();
   }
 });
 

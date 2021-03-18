@@ -74,14 +74,23 @@ userSchema.statics.findByCredentials = async (email, password) => {
   return user;
 };
 
-userSchema.statics.findById = async (id) => {
-  const user = await User.findOne({_id : id})
-  if(!user){
-    throw new Error("Unable to login")
+// userSchema.statics.findById = async (id) => {
+//   const user = await User.findOne({_id : id})
+//   if(!user){
+//     throw new Error("Unable to login")
+//   }
+
+//   return user
+// }
+
+userSchema.statics.findByEmail = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error("Can't find user");
   }
 
-  return user
-}
+  return user;
+};
 
 //hashing the passwords before saving
 userSchema.pre("save", async function (next) {
